@@ -1,3 +1,5 @@
+import { getAllCars, updateCar } from "./api.js";
+
 const edit_form = document.getElementById("edit_form");
 
 edit_form.addEventListener("submit", function (e) {
@@ -8,7 +10,7 @@ edit_form.addEventListener("submit", function (e) {
     const speedInput = document.getElementById("edit_speed_input");
 
     const power = powerInput.value;
-    const mark = markInput.value;
+    const mark = markInput.value.trim();
     const speed = speedInput.value;
 
     if (!power || !mark || !speed) {
@@ -18,22 +20,13 @@ edit_form.addEventListener("submit", function (e) {
 
     const carIndex = localStorage.getItem("editForm"); 
 
-    let cars = JSON.parse(localStorage.getItem("cars"));
-
-    for(let i = 0; i < cars.length; i++) {
-        if(i == carIndex) {
-            console.log(cars);
-            const carId = i;
-            cars[i] = {
-                power,
-                mark,
-                speed,
-                carId,
-            };
-            localStorage.setItem("cars", JSON.stringify(cars));
-            console.log(cars);
-        }
+    const newCar = {
+        power,
+        mark,
+        speed
     }
+    
+    updateCar(carIndex, newCar);
 
     powerInput.value = "";
     markInput.value = "";

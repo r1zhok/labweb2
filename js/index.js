@@ -1,3 +1,5 @@
+import { getAllCars, deleteCar } from "./api.js";
+
 const itemsContainer = document.getElementById("items_container");
 const sortButton = document.getElementById("sort_button");
 const countButton = document.getElementById("button_count");
@@ -10,28 +12,32 @@ let cloneForms = [];
 let counter = 0;
 let carForms = [];
 
-function loadCarsFromLocalStorage() {
-    const cars = JSON.parse(localStorage.getItem("cars")) || [];
+const loadCarsFromBackend = async () => {
+    while (itemsContainer.firstChild) {
+        itemsContainer.removeChild(itemsContainer.firstChild);
+    }
+    const cars = await getAllCars();
     carForms = cars;
     carForms.forEach((car) => {
         renderCars(car);
     });
 }
 
-loadCarsFromLocalStorage();
+loadCarsFromBackend();
 
 // this from video, it's render form, lol
 function renderCars(car) {
     const carForm = document.createElement("div");
     carForm.className = "car-form";
     carForm.innerHTML = `
-        <li id=${car.carId} class="card mb-3 item-card" draggable="true">
+        <li id=${car.id} class="card mb-3 item-card" draggable="true">
             <img src="./image/pexels-garvin-st-villier-3972755.jpg" class="item-container__image card-img-top" alt="card">
             <div class="card-body">
                 <p>Потужність: ${car.power} hp</p>
                 <p>Марка: ${car.mark}</p>
                 <p>Швидкість: ${car.speed} km/h</p>
                 <button type="button" class="btn btn-info" id="edit-button">Edit</button>
+                <button type="button" class="btn btn-danger" id="delete-button">Delete</button>
             </div>
         </li>
     `;
@@ -105,6 +111,22 @@ itemsContainer.addEventListener("click", (event) => {
             const carId = parentListItem.id;
             localStorage["editForm"] = carId;
             window.location.href = "edit.html";
+        }
+    } else if (event.target.id === "delete-button") {
+        const deleteButton = event.target;
+        const parentListItem = deleteButton.closest("li");
+        if (parentListItem) {
+            const carId = parentListItem.id;
+            deleteCar(carId).then(() => {
+                loadCarsFromBackend().then(() => {
+                    while (itemsContainer.firstChild) {
+                        itemsContainer.removeChild(itemsContainer.firstChild);
+                    }
+                    carForms.forEach((car) => {
+                        renderCars(car);
+                    });
+                });
+            });
         }
     }
 });
